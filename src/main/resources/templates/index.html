@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@^2/dist/tailwind.min.css" />
+    <script>
+        function copyToClipboard(text) {
+            if (!text || text.trim() === "") {
+                alert('No shortened URL available to copy.');
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                alert('URL copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        }
+
+        function shareURL(url) {
+            if (!url || url.trim() === "") {
+                alert('No shortened URL available to share.');
+                return;
+            }
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Check out this URL!',
+                    url: url,
+                }).then(() => {
+                    console.log('Successful share');
+                }).catch(err => {
+                    console.error('Error sharing: ', err);
+                });
+            } else {
+                alert('Sharing not supported on this browser. Please copy the URL instead.');
+                copyToClipboard(url);
+            }
+        }
+    </script>
+</head>
+<body class="bg-gray-900 text-gray-100 min-h-screen flex flex-col dark:bg-gray-900">
+<header class="bg-gray-800 py-4 shadow-md w-full">
+    <div class="container mx-auto flex justify-between items-center px-4">
+        <h1 class="text-2xl font-bold text-gray-100">URL Shortener</h1>
+    </div>
+</header>
+
+<main class="container mx-auto px-4 py-12 flex-grow flex flex-col lg:flex-row items-center justify-center gap-20 lg:space-x-8">
+    <div class="w-full max-w-lg bg-gray-800 p-8 rounded-lg shadow-lg">
+        <h2 class="text-2xl font-bold mb-6 text-center">Shorten Your URL</h2>
+        <form th:action="@{/shorten}" method="post" class="space-y-4">
+            <label for="url" class="block text-sm font-medium">Enter URL:</label>
+            <input
+                    type="text"
+                    id="url"
+                    name="url"
+                    required
+                    class="w-full bg-gray-700 border border-gray-600 rounded-md p-2 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none focus:ring focus:ring-blue-500 focus:ring-opacity-50"
+                    placeholder="https://example.com/long-url"
+            />
+            <button
+                    type="submit"
+                    class="w-full bg-blue-600 text-white rounded-md py-2 font-semibold hover:bg-blue-700 transition-colors"
+            >
+                Shorten
+            </button>
+        </form>
+        <div th:if="${shortenedUrl != null}" class="mt-6 bg-gray-700 p-4 rounded-md text-center">
+            <h3 class="text-lg font-semibold">Your Shortened URL:</h3>
+            <a
+                    th:href="${shortenedUrl}"
+                    th:text="${shortenedUrl}"
+                    target="_blank"
+                    class="text-blue-400 hover:underline break-words"
+            ></a>
+            <div class="mt-4 flex justify-center space-x-4">
+                <button th:attr="onclick='copyToClipboard(\'' + ${shortenedUrl} + '\')'" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700 transition-colors">
+                    Copy
+                </button>
+                <button th:attr="onclick='shareURL(\'' + ${shortenedUrl} + '\')'" class="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                    Share
+                </button>
+            </div>
+        </div>
+        <div th:if="${error != null}" class="mt-4 text-red-400 text-center">
+            <p th:text="${error}" class="font-medium"></p>
+        </div>
+    </div>
+    <section class="mt-8 lg:mt-0 text-center lg:text-left">
+        <h2 class="text-4xl font-semibold text-gray-100 mb-4">Simplify Your Links</h2>
+        <p class="text-lg text-gray-400 max-w-lg">
+            Transform long, complicated URLs into concise, shareable links. Our service makes it easy, fast, and reliable for you to manage and share your links with anyone.
+        </p>
+    </section>
+</main>
+<footer class="bg-gray-800 py-4 mt-12 w-full">
+    <div class="container mx-auto text-center">
+        <p class="text-gray-500">© 2024 URL Shortener Service. All rights reserved.</p>
+    </div>
+</footer>
+</body>
+</html>
